@@ -33,6 +33,8 @@ if (route === "schema") {
     }
   );
 
+  console.log(response.data, "OpenAPI schema data");
+
   const inputSchema =
     response.data.components?.schemas?.input?.properties || {};
 

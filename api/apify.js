@@ -25,29 +25,20 @@ export default async function handler(req, res) {
       return res.status(200).json({ actors });
     }
 
-    if (route === "schema") {
-      const response = await axios.get(`https://api.apify.com/v2/acts/${actorId}`, {
-        headers: { Authorization: `Bearer ${apiKey}` },
-      });
-
-      const inputSchema = response.data.data.inputSchema || {};
-      return res.status(200).json({ inputSchema });
+if (route === "schema") {
+  const response = await axios.get(
+    `https://api.apify.com/v2/acts/${actorId}/builds/latest/openapi.json`,
+    {
+      headers: { Authorization: `Bearer ${apiKey}` },
     }
+  );
 
-    if (route === "run") {
-      const response = await axios.post(
-        `https://api.apify.com/v2/acts/${actorId}/runs`,
-        { input },
-        {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  const inputSchema =
+    response.data.components?.schemas?.input?.properties || {};
 
-      return res.status(200).json(response.data);
-    }
+  return res.status(200).json({ inputSchema });
+}
+
 
     return res.status(400).json({ error: "Invalid route" });
   } catch (err) {

@@ -3,7 +3,7 @@
 let actors = [];
 let selectedSchema = {};
 
-const BASE_URL = ""; // Not needed for Vercel relative path
+const BASE_URL = ""; 
 
 document.addEventListener("DOMContentLoaded", () => {
     const apiKeyInput = document.getElementById("apiKey");

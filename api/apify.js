@@ -1,82 +1,57 @@
-// pages/api/apify.js
-
+// /api/apify.js
 import axios from "axios";
 
 export default async function handler(req, res) {
-  const { method, query: { route } } = req;
+  const { method } = req;
+  const { route } = req.query;
 
   if (method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  const { apiKey, actorId, input } = req.body;
+
   try {
     if (route === "actors") {
-      const { apiKey } = req.body;
+      const response = await axios.get("https://api.apify.com/v2/acts", {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
 
-      if (!apiKey) return res.status(400).json({ error: "Missing API key" });
-
-      const response = await axios.get(`https://api.apify.com/v2/acts?token=${apiKey}`);
-      const actors = response.data.data.items.map(a => ({
-        actorId: a.id,
-        name: a.name,
+      const actors = response.data.data.items.map((act) => ({
+        name: act.name,
+        actorId: act.id,
       }));
-      return res.json({ actors });
+
+      return res.status(200).json({ actors });
     }
 
     if (route === "schema") {
-      const { apiKey, actorId } = req.body;
+      const response = await axios.get(`https://api.apify.com/v2/acts/${actorId}`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
 
-      const url = `https://api.apify.com/v2/acts/${actorId}/builds/latest/openapi.json?token=${apiKey}`;
-      const response = await axios.get(url);
-      const inputSchema = response.data.components?.schemas?.input?.properties;
-
-      if (!inputSchema) {
-        return res.status(404).json({ error: "Input schema not found" });
-      }
-
-      return res.json({ inputSchema });
+      const inputSchema = response.data.data.inputSchema || {};
+      return res.status(200).json({ inputSchema });
     }
 
     if (route === "run") {
-      const { apiKey, actorId, input } = req.body;
-
-      const runResponse = await axios.post(
-        `https://api.apify.com/v2/acts/${actorId}/runs?token=${apiKey}`,
-        input
+      const response = await axios.post(
+        `https://api.apify.com/v2/acts/${actorId}/runs`,
+        { input },
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
 
-      const runId = runResponse.data.data.id;
-      const consoleUrl = runResponse.data.data.consoleUrl;
-
-      let result;
-      let finished = false;
-
-      while (!finished) {
-        const statusRes = await axios.get(`https://api.apify.com/v2/actor-runs/${runId}?token=${apiKey}`);
-        const data = statusRes.data.data;
-
-        if (data.status === "SUCCEEDED") {
-          finished = true;
-          result = data;
-        } else if (data.status === "FAILED") {
-          finished = true;
-          result = {
-            error: "Actor failed",
-            statusMessage: data.statusMessage,
-            consoleUrl,
-          };
-        } else {
-          await new Promise(r => setTimeout(r, 2000));
-        }
-      }
-
-      return res.json(result);
+      return res.status(200).json(response.data);
     }
 
-    return res.status(404).json({ error: "Invalid route" });
-
-  } catch (error) {
-    console.error("API Route Error:", error);
-    return res.status(500).json({ error: error.message || "Internal Server Error" });
+    return res.status(400).json({ error: "Invalid route" });
+  } catch (err) {
+    console.error("API error:", err.message || err);
+    return res.status(500).json({ error: "Server error", message: err.message });
   }
 }

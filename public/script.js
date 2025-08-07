@@ -113,7 +113,7 @@ async function fetchSchema() {
     });
 
     const data = await res.json();
-    const selectedSchema = data.inputSchema || {};
+    const selectedSchema = data.properties || {};
     console.log("Fetched schema:", selectedSchema);
 
     const form = document.getElementById("schemaForm");

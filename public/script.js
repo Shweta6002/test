@@ -1,3 +1,5 @@
+const BASE_URL = "https://test-henna-ten-67.vercel.app/";
+
 let actors = [];
 let selectedSchema = {};
 
@@ -62,7 +64,7 @@ function toggleButtonStyle(button) {
 
 async function fetchActors() {
     const apiKey = document.getElementById("apiKey").value;
-    const res = await fetch("http://localhost:3000/actors", {
+    const res = await fetch(`${BASE_URL}/actors`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey }),
@@ -106,7 +108,7 @@ async function fetchSchema() {
     const actorId = document.getElementById("actorSelect").value;
     const apiKey = document.getElementById("apiKey").value;
 
-    const res = await fetch("http://localhost:3000/schema", {
+    const res = await fetch(`${BASE_URL}/schema`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey, actorId }),
@@ -325,7 +327,7 @@ async function runActor() {
     console.log("Final inputs to backend:", inputValues);
     delete inputValues.proxyConfig; // If you want to exclude proxyConfig
 
-    const res = await fetch("http://localhost:3000/run", {
+    const res = await fetch(`${BASE_URL}/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey, actorId, input: inputValues }),

@@ -9,10 +9,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { apiKey, actorId, input } = req.body;
-
   try {
     if (route === "actors") {
+
+      const { apiKey } = req.body;
       const response = await axios.get("https://api.apify.com/v2/acts", {
         headers: { Authorization: `Bearer ${apiKey}` },
       });
@@ -42,6 +42,7 @@ export default async function handler(req, res) {
     }
 
     if(route === "run") {
+      const { apiKey, actorId, input } = req.body;
       const runResponse = await axios.post(
         `https://api.apify.com/v2/acts/${actorId}/runs?token=${apiKey}`,
         {...input}

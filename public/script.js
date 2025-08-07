@@ -171,36 +171,79 @@ function validateFormFields() {
 }
 
 async function runActor() {
-    showSuccessToast("Running actor...");
-
+    showSuccessToast("Running Actor...");
     const apiKey = document.getElementById("apiKey").value;
     const actorId = document.getElementById("actorSelect").value;
     const form = document.getElementById("schemaForm");
 
     const inputValues = {};
+    console.log("Collecting input values...");
+
+    // Group inputs by name (handles arrays with multiple inputs)
+    const inputsByName = {};
 
     Array.from(form.querySelectorAll("input")).forEach((input) => {
-        const val = input.value.trim();
-        if (val) {
-            inputValues[input.name] = isNaN(val) ? val : Number(val);
-        }
+        const key = input.name;
+        if (!key) return;
+
+        if (!inputsByName[key]) inputsByName[key] = [];
+        inputsByName[key].push(input);
     });
 
-    const res = await fetch(`/api/apify?route=run`, {
+    for (const key in inputsByName) {
+        const inputs = inputsByName[key];
+        const firstInput = inputs[0];
+        const type = firstInput.dataset.type || "string";
+
+        if (type === "array") {
+            // Collect all non-empty values
+            const values = inputs
+                .map((input) => input.value.trim())
+                .filter((val) => val !== "");
+
+            if (values.length > 0) {
+                inputValues[key] = values;
+            }
+        } else if (type === "boolean") {
+            const val = firstInput.value.trim();
+            if (val) {
+                inputValues[key] = val.toLowerCase() === "true";
+            }
+        } else if (type === "integer" || type === "number") {
+            const val = firstInput.value.trim();
+            if (val) {
+                const num = Number(val);
+                if (!isNaN(num)) {
+                    inputValues[key] = num;
+                }
+            }
+        } else {
+            const val = firstInput.value.trim();
+            if (val) {
+                inputValues[key] = val;
+            }
+        }
+    }
+
+    console.log("Final inputs to backend:", inputValues);
+    delete inputValues.proxyConfig; // If you want to exclude proxyConfig
+
+    const res = await fetch("http://localhost:3000/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey, actorId, input: inputValues }),
     });
 
     const data = await res.json();
-
     const resultEl = document.getElementById("result");
     resultEl.textContent = JSON.stringify(data, null, 2);
     resultEl.style.whiteSpace = "pre-wrap";
 
     if (data.error) {
         showErrorToast("Actor failed");
+
     } else {
-        showSuccessToast("Actor run completed!");
+        showSuccessToast("Actor Run Completed");
+
     }
 }

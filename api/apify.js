@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
 if (route === "schema") {
   console.log("Received apiKey:", apiKey);
-console.log("Received actorId:", actorId);
+  console.log("Received actorId:", actorId);
   if (!apiKey || !actorId) {
     return res.status(400).json({ error: "Missing API key or actor ID" });
   }

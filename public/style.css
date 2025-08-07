@@ -1,0 +1,192 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: radial-gradient(circle at top left, #1f2937, #111827);
+    color: #e8e8e8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 60px 20px;
+}
+
+.container {
+    background: #1e1e2f;
+    padding: 40px 30px;
+    border-radius: 12px;
+    max-width: 800px;
+    width: 100%;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid #2b2b2b;
+    animation: fadeIn 0.8s ease;
+}
+
+h1 {
+    font-size: 28px;
+    color: #fff;
+    margin-bottom: 32px;
+    text-align: center;
+    font-weight: 600;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 12px 16px;
+    margin: 10px 0 14px;
+    border: 1px solid #2e2e2e;
+    border-radius: 8px;
+    background-color: #2a2f4a;
+    color: #f5f5f5;
+    font-size: 15px;
+    transition: all 0.2s ease-in-out;
+}
+
+input:focus,
+select:focus {
+    border-color: #a970c5;
+    background-color: #252a3f;
+    box-shadow: 0 0 0 3px rgba(169, 112, 197, 0.4);
+    outline: none;
+}
+
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23f5f5f5' d='M2 5L0 0h4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 10px 10px;
+}
+
+select:disabled {
+    color: #777;
+}
+
+select option {
+    background-color: #2a2f4a;
+    color: #f5f5f5;
+    padding: 10px;
+}
+
+button {
+    padding: 10px 18px;
+    background: linear-gradient(to right, #7c5b81, #ca92d4);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-right: 10px;
+    transition: background 0.3s ease, transform 0.2s ease;
+    transform: translateY(-2px);
+}
+
+button:hover {
+    background: linear-gradient(to right, #693d74, #b86cc2);
+    box-shadow: 0 0 12px rgba(199, 112, 231, 0.65);
+}
+
+button:disabled,
+.disabled-btn {
+    background: #3c475e !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+#schemaForm button {
+    border: 1px solid #444;
+    padding: 8px 14px;
+    font-size: 14px;
+    border-radius: 6px;
+    margin-top: 16px;
+    margin-right: 8px;
+    height: fit-content;
+    background-color: #2a2a2a;
+    color: #ccc;
+}
+
+#schemaForm button:hover {
+    background: linear-gradient(to right, #7c5b81, #be95c5);
+    box-shadow: 0 0 12px rgba(221, 167, 238, 0.6);
+}
+
+label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #ccc;
+    font-size: 14px;
+}
+
+#schemaForm p {
+    font-size: 13px;
+    color: #999;
+    margin: 4px 0 8px;
+}
+
+#schemaForm div {
+    margin-bottom: 26px;
+}
+
+#result {
+    background-color: #2a2f4a;
+    border: 1px solid #333;
+    padding: 18px;
+    margin-top: 24px;
+    border-radius: 8px;
+    color: #f5f5f5;
+    font-size: 14px;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
+form {
+    width: 100%;
+}
+
+#apiKey,
+#actorSelect {
+    max-width: 100%;
+    margin-bottom: 24px;
+    display: block;
+}
+
+.custom-toast {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 20px !important;
+    margin: 10px !important;
+    padding: 14px 14px 14px 40px !important;
+    font-weight: 600 !important;
+    font-family: 'Poppins', sans-serif !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+    border-radius: 30px !important;
+}
+
+.success-toast {
+    background: #D1FAE5 !important;
+    color: #1CC457 !important;
+    border: 1px solid #34D399 !important;
+}
+
+.error-toast {
+    background: #FEE2E2 !important;
+    color: #DF1616 !important;
+    border: 1px solid #F87171 !important;
+}
+
+.Toastify {
+    z-index: 9999 !important;
+}

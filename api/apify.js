@@ -1,9 +1,7 @@
-const axios = require("axios");
+import axios from "axios";
 
 export default async function handler(req, res) {
-  const { method, url } = req;
-
-  // Extract the route from query params
+  const { method } = req;
   const { route } = req.query;
 
   if (method !== "POST") {
@@ -70,10 +68,10 @@ export default async function handler(req, res) {
       return res.json(result);
     }
 
-    // Unknown route
     return res.status(404).json({ error: "Invalid route" });
 
   } catch (error) {
+    console.error("API Error:", error);
     return res.status(500).json({ error: error.toString() });
   }
 }

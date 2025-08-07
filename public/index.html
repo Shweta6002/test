@@ -7,37 +7,31 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
     <!-- Toastify CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-
 </head>
 
 <body>
+    <div class="container">
+        <h1>Run Apify API Key</h1>
 
-    <body>
-        <div class="container">
-            <h1>Run Apify API Key</h1>
+        <input type="text" id="apiKey" placeholder="Enter your API key" />
+        <button id="fetchActorsBtn">Fetch Actors</button><br><br>
 
-            <input type="text" id="apiKey" placeholder="Enter your API key" />
-            <button id="fetchActorsBtn">Fetch Actors</button><br><br>
+        <select id="actorSelect">
+            <option disabled selected>Select one option</option>
+        </select>
 
-            <select id="actorSelect">
-                <option disabled selected>Select one option</option>
-            </select>
+        <form id="schemaForm"></form>
+        <button id="runActorBtn">Run Actor</button>
 
-            <form id="schemaForm"></form>
-            <button id="runActorBtn">Run Actor</button>
+        <pre id="result"></pre>
+    </div>
 
-            <pre id="result"></pre>
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-        <script src="script.js"></script>
-    </body>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="script.js"></script>
+</body>
 
 </html>

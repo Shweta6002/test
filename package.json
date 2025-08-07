@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vercel dev"
+    "dev": "vercel dev",
+  "start": "node api/apify.js",
+  "build": "echo 'No build step needed'"
   },
   "dependencies": {
     "axios": "^1.6.7"

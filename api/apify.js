@@ -38,7 +38,7 @@ if (route === "schema") {
   const inputSchema =
       response.data.components?.schemas?.inputSchema || {};
 
-  return res.status(200).json({ inputSchema });
+  return res.status(200).json(inputSchema);
 }
 
 

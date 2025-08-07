@@ -36,7 +36,7 @@ if (route === "schema") {
   console.log(openapi, "openapi>>>>>>>>>>>>")
 
   const inputSchema =
-      response.data.components?.schemas?.inputSchema || {};
+      response.data.components?.schemas?.inputSchema?.properties || {};
 
   return res.status(200).json(inputSchema);
 }

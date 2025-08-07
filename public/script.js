@@ -64,11 +64,12 @@ function toggleButtonStyle(button) {
 
 async function fetchActors() {
     const apiKey = document.getElementById("apiKey").value;
-    const res = await fetch(`${BASE_URL}/actors`, {
+    const res = await fetch(`/api/apify?route=actors`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey }),
     });
+
 
     const data = await res.json();
     actors = data.actors || [];
@@ -108,11 +109,12 @@ async function fetchSchema() {
     const actorId = document.getElementById("actorSelect").value;
     const apiKey = document.getElementById("apiKey").value;
 
-    const res = await fetch(`${BASE_URL}/schema`, {
+    const res = await fetch(`/api/apify?route=schema`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey, actorId }),
     });
+
 
     const data = await res.json();
     const selectedSchema = data.inputSchema || {};
@@ -327,11 +329,12 @@ async function runActor() {
     console.log("Final inputs to backend:", inputValues);
     delete inputValues.proxyConfig; // If you want to exclude proxyConfig
 
-    const res = await fetch(`${BASE_URL}/run`, {
+    const res = await fetch(`/api/apify?route=run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey, actorId, input: inputValues }),
     });
+
 
     const data = await res.json();
     const resultEl = document.getElementById("result");

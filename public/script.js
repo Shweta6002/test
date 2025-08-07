@@ -1,15 +1,12 @@
-// public/script.js
-
 let actors = [];
 let selectedSchema = {};
-
-const BASE_URL = ""; 
 
 document.addEventListener("DOMContentLoaded", () => {
     const apiKeyInput = document.getElementById("apiKey");
     const fetchBtn = document.getElementById("fetchActorsBtn");
     const runBtn = document.getElementById("runActorBtn");
 
+    // Disable fetch button if API key is empty
     apiKeyInput.addEventListener("input", () => {
         fetchBtn.disabled = !apiKeyInput.value.trim();
         toggleButtonStyle(fetchBtn);
@@ -23,6 +20,12 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchBtn.addEventListener("click", fetchActors);
     document.getElementById("actorSelect").addEventListener("change", fetchSchema);
     runBtn.addEventListener("click", runActor);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("fetchActorsBtn").addEventListener("click", fetchActors);
+    document.getElementById("actorSelect").addEventListener("change", fetchSchema);
+    document.getElementById("runActorBtn").addEventListener("click", runActor);
 });
 
 function showSuccessToast(message, type = "info") {
@@ -59,7 +62,7 @@ function toggleButtonStyle(button) {
 
 async function fetchActors() {
     const apiKey = document.getElementById("apiKey").value;
-    const res = await fetch(`/api/apify?route=actors`, {
+    let res = await fetch(`/api/apify?route=actors`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey }),
@@ -72,7 +75,7 @@ async function fetchActors() {
     select.innerHTML = "";
 
     if (!actors.length) {
-        showErrorToast("No actors found");
+        showErrorToast("Actor failed");
         return;
     }
 
@@ -89,13 +92,15 @@ async function fetchActors() {
         option.textContent = actor.name;
         select.appendChild(option);
     });
+    showSuccessToast("Fetched successfully!");
 
-    showSuccessToast("Actors fetched successfully!");
 }
 
 function cleanText(text) {
+    // Unicode emoji ranges and some symbols removed via regex
     return text.replace(/[\u{1F300}-\u{1F6FF}|\u{2600}-\u{26FF}|\u{2700}-\u{27BF}|\u{1F900}-\u{1F9FF}]/gu, '').trim();
 }
+
 
 async function fetchSchema() {
     const actorId = document.getElementById("actorSelect").value;
@@ -108,56 +113,148 @@ async function fetchSchema() {
     });
 
     const data = await res.json();
-    selectedSchema = data.properties || {};
-    console.log("Schema:", selectedSchema);
+    const selectedSchema = data.inputSchema || {};
+    console.log("Fetched schema:", selectedSchema);
 
     const form = document.getElementById("schemaForm");
+
+    // Save previous values
+    const oldInputs = {};
+    Array.from(form.elements).forEach((el) => {
+        if (el.name) oldInputs[el.name] = el.value;
+    });
+
     form.innerHTML = "";
 
     if (Object.keys(selectedSchema).length === 0) {
-        form.innerHTML = "<p style='color: red;'>⚠️ No schema fields found.</p>";
+        form.innerHTML =
+            "<p style='color: red;'>⚠️ No schema fields available. Try another actor or check the schema.</p>";
         return;
     }
-
+    // Limit to first 6 fields (adjust the number if needed)
     const limitedKeys = Object.keys(selectedSchema).slice(0, 6);
 
     for (const key of limitedKeys) {
         const field = selectedSchema[key];
-        const { type, title, description } = field;
+        const { type, title, description, minimum } = field;
 
         const container = document.createElement("div");
-        container.className = "form-group";
+        container.style.marginBottom = "20px";
 
         const label = document.createElement("label");
+        // Remove emoji-like characters from titles
+        const cleanTitle = (title || key).replace(/[\u{1F300}-\u{1F6FF}|\u{2600}-\u{26FF}|\u{2700}-\u{27BF}|\u{1F900}-\u{1F9FF}]/gu, '').trim();
         label.innerHTML = `<strong>${cleanText(title || key)}</strong>`;
         label.htmlFor = key;
         container.appendChild(label);
 
         if (description) {
             const desc = document.createElement("p");
-            desc.className = "field-description";
-            desc.textContent = description.replace(/<[^>]*>/g, "").slice(0, 100);
+            desc.style.fontSize = "12px";
+            desc.style.color = "#aaa";
+            desc.style.marginTop = "4px";
+
+            // Remove HTML and truncate
+            const plainText = description.replace(/<\/?[^>]+(>|$)/g, "");
+            desc.textContent = plainText.length > 120 ? plainText.slice(0, 120) + "..." : plainText;
+
             container.appendChild(desc);
         }
 
-        const input = document.createElement("input");
-        input.name = key;
-        input.placeholder = title || key;
-        input.className = "form-control";
+        if (type === "array" && field.items?.type === "string") {
+            const listContainer = document.createElement("div");
+            listContainer.id = `${key}-list`;
 
-        if (type === "number" || type === "integer") {
-            input.type = "number";
+            function createArrayInput(value = "") {
+                const row = document.createElement("div");
+                row.style.display = "flex";
+                row.style.marginBottom = "6px";
+
+                const input = document.createElement("input");
+                input.type = "text";
+                input.name = key;
+                input.dataset.type = "array";
+                input.value = value;
+                input.style.flexGrow = "1";
+                input.placeholder = cleanText(title || key);
+
+                input.addEventListener("input", validateFormFields);
+
+                row.appendChild(input);
+
+                const removeBtn = document.createElement("button");
+                removeBtn.type = "button";
+                removeBtn.textContent = "Remove";
+                removeBtn.style.marginLeft = "8px";
+                removeBtn.onclick = () => {
+                    listContainer.removeChild(row);
+                    if (listContainer.children.length === 0) {
+                        listContainer.appendChild(createArrayInput(""));
+                    }
+                };
+                row.appendChild(removeBtn);
+
+                return row;
+            }
+
+            if (oldInputs[key]) {
+                try {
+                    const oldVals = JSON.parse(oldInputs[key]);
+                    if (Array.isArray(oldVals) && oldVals.length) {
+                        oldVals.forEach(val => {
+                            listContainer.appendChild(createArrayInput(val));
+                        });
+                    } else {
+                        listContainer.appendChild(createArrayInput(""));
+                    }
+                } catch {
+                    listContainer.appendChild(createArrayInput(oldInputs[key]));
+                }
+            } else {
+                listContainer.appendChild(createArrayInput(""));
+            }
+
+            container.appendChild(listContainer);
+
+            const addBtn = document.createElement("button");
+            addBtn.type = "button";
+            addBtn.textContent = "Add another";
+            addBtn.onclick = () => {
+                listContainer.appendChild(createArrayInput(""));
+            };
+            container.appendChild(addBtn);
         } else {
-            input.type = "text";
-        }
+            const input = document.createElement("input");
+            input.name = key;
+            input.id = key;
+            input.placeholder = title || key;
+            input.style.display = "block";
+            input.style.marginTop = "6px";
+            input.style.width = "100%";
 
-        input.addEventListener("input", validateFormFields);
-        container.appendChild(input);
+            if (type === "integer" || type === "number") {
+                input.type = "number";
+                if (minimum !== undefined) input.min = minimum;
+                input.dataset.type = "number";
+            } else if (type === "boolean") {
+                input.type = "text";
+                input.dataset.type = "boolean";
+            } else {
+                input.type = "text";
+                input.dataset.type = "string";
+            }
+
+            if (oldInputs[key]) input.value = oldInputs[key];
+            input.addEventListener("input", validateFormFields);
+
+            container.appendChild(input);
+        }
 
         form.appendChild(container);
     }
 
     validateFormFields();
+
 }
 
 function validateFormFields() {
@@ -228,7 +325,7 @@ async function runActor() {
     console.log("Final inputs to backend:", inputValues);
     delete inputValues.proxyConfig; // If you want to exclude proxyConfig
 
-    const res = await fetch("http://localhost:3000/run", {
+    const res = await fetch(`/api/apify?route=run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey, actorId, input: inputValues }),
@@ -246,4 +343,7 @@ async function runActor() {
         showSuccessToast("Actor Run Completed");
 
     }
+
+
+
 }

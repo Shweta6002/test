@@ -26,22 +26,17 @@ export default async function handler(req, res) {
     }
 
 if (route === "schema") {
-  console.log("Received apiKey:", apiKey);
-  console.log("Received actorId:", actorId);
-  if (!apiKey || !actorId) {
-    return res.status(400).json({ error: "Missing API key or actor ID" });
-  }
-  const response = await axios.get(
-    `https://api.apify.com/v2/acts/${actorId}/builds/latest/openapi.json`,
-    {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    }
-  );
+  const { apiKey, actorId } = req.body;
+  
+  // Build URL for OpenAPI schema
+  const url = `https://api.apify.com/v2/acts/${actorId}/builds/default/openapi.json?token=${apiKey}`;
 
-  console.log(response.data, "OpenAPI schema data");
+  const response = await axios.get(url);
+  const openapi = response.data;
+  console.log(openapi, "openapi>>>>>>>>>>>>")
 
   const inputSchema =
-    response.data.components?.schemas?.input?.properties || {};
+      response.data.components?.schemas?.inputSchema || {};
 
   return res.status(200).json({ inputSchema });
 }
